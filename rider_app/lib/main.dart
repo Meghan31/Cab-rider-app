@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rider_app/screens/forgot_pass.dart';
+import 'package:rider_app/screens/forgot_pass_screen.dart';
 import 'package:rider_app/screens/login_screen.dart';
 import 'package:rider_app/screens/main_screen.dart';
 import 'package:rider_app/screens/signup_screen.dart';
