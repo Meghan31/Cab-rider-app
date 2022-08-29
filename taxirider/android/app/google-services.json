@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "772302949662",
+    "project_id": "taxi-rider-eb595",
+    "storage_bucket": "taxi-rider-eb595.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:772302949662:android:5c6d257ad51ff0287c8d0f",
+        "android_client_info": {
+          "package_name": "com.example.taxirider"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "772302949662-982k5dr173lm6t32mp7cb4mvpi0e789r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVzHRpu-fHMIGB2qXloAJi2chRJpGqSJU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "772302949662-982k5dr173lm6t32mp7cb4mvpi0e789r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
