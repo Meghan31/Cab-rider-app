@@ -1,14 +1,23 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, unnecessary_new
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:taxirider/main.dart';
 import 'package:taxirider/screens/forgot_pass_screen.dart';
 import 'package:taxirider/screens/signup_screen.dart';
 
+import 'main_screen.dart';
+
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  LoginScreen({Key? key}) : super(key: key);
   static const routeName = '/login';
+
+  TextEditingController emailTextEditingController = TextEditingController();
+  TextEditingController passwordTextEditingController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,6 +54,7 @@ class LoginScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     TextField(
+                      controller: emailTextEditingController,
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
                         labelText: 'Email',
@@ -62,7 +72,8 @@ class LoginScreen extends StatelessWidget {
                     const SizedBox(
                       height: 1,
                     ),
-                    const TextField(
+                    TextField(
+                      controller: passwordTextEditingController,
                       obscureText: true,
                       decoration: InputDecoration(
                         labelText: 'Password',
@@ -82,7 +93,15 @@ class LoginScreen extends StatelessWidget {
                     ),
                     RaisedButton(
                       onPressed: () {
-                        print('logged');
+                        if (!emailTextEditingController.text.contains('@')) {
+                          displayToastMessage(
+                              'Email address not Valid.', context);
+                        }
+                        if (passwordTextEditingController.text.isEmpty) {
+                          displayToastMessage('Password is Mandatory', context);
+                        } else {
+                          loginAndAuthenticateUser(context);
+                        }
                       },
                       color: Colors.yellow,
                       textColor: Colors.black87,
@@ -156,5 +175,26 @@ class LoginScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  void loginAndAuthenticateUser(BuildContext context) async {
+    final User? firebaseUser = (await _firebaseAuth
+            .signInWithEmailAndPassword(
+      email: emailTextEditingController.text,
+      password: passwordTextEditingController.text,
+    )
+            .catchError((errMsg) {
+      displayToastMessage("Error: $errMsg", context);
+    }))
+        .user;
+    if (firebaseUser != null) //user created
+    {
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil(MainScreen.routeName, (route) => false);
+      displayToastMessage('your are logged in', context);
+    } else {
+      displayToastMessage('No account exist with this credentials ', context);
+    }
   }
 }
