@@ -121,7 +121,7 @@ class SignupScreen extends StatelessWidget {
                       height: 10,
                     ),
                     RaisedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (nameTextEditingController.text.length < 3) {
                           displayToastMessage(
                               'Name must be atleast 3 characters.', context);
@@ -219,9 +219,9 @@ class SignupScreen extends StatelessWidget {
         'name': nameTextEditingController.text.trim(),
         'email': emailTextEditingController.text.trim(),
         'number': numberTextEditingController.text.trim(),
-        // 'password': passwordTextEditingController,
+        'password': passwordTextEditingController.text.trim(),
       };
-      userRef.child(firebaseUser.uid).set(userDataMap);
+      usersRef.child(firebaseUser.uid).set(userDataMap);
       displayToastMessage('Congo!!!, your account has been created', context);
 
       Navigator.of(context)
