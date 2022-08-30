@@ -12,7 +12,7 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-DatabaseReference userRef =
+DatabaseReference usersRef =
     FirebaseDatabase.instance.reference().child('users');
 
 class MyApp extends StatelessWidget {
