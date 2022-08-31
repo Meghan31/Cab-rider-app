@@ -7,6 +7,8 @@ import 'package:taxirider/main.dart';
 import 'package:taxirider/screens/login_screen.dart';
 import 'package:taxirider/screens/main_screen.dart';
 
+import '../widgets/progressDialog.dart';
+
 class SignupScreen extends StatelessWidget {
   SignupScreen({Key? key}) : super(key: key);
   static const routeName = '/signup';
@@ -27,14 +29,14 @@ class SignupScreen extends StatelessWidget {
               const SizedBox(
                 height: 45,
               ),
-              // const Center(
-              //   child: Image(
-              //     image: AssetImage('assets/images/mylogo.jpeg'),
-              //     width: 300,
-              //     height: 200,
-              //     alignment: Alignment.center,
-              //   ),
-              // ),
+              Center(
+                child: Image(
+                  image: AssetImage('assets/images/newlogo.png'),
+                  width: 300,
+                  height: 200,
+                  alignment: Alignment.center,
+                ),
+              ),
               const SizedBox(
                 height: 15,
               ),
@@ -204,6 +206,12 @@ class SignupScreen extends StatelessWidget {
 //the class "AuthResult" was changed to "UserCredential"
 
   Future<void> registerNewUser(BuildContext context) async {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return ProgressDialog();
+        });
     final User? firebaseUser = (await _firebaseAuth
             .createUserWithEmailAndPassword(
       email: emailTextEditingController.text,
@@ -227,6 +235,7 @@ class SignupScreen extends StatelessWidget {
       Navigator.of(context)
           .pushNamedAndRemoveUntil(MainScreen.routeName, (route) => false);
     } else {
+      Navigator.of(context).pop;
       //error occured-display error msg
       displayToastMessage('New user account has not been created', context);
     }
