@@ -210,7 +210,7 @@ class SignupScreen extends StatelessWidget {
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return ProgressDialog();
+          return ProgressDialog2();
         });
     final User? firebaseUser = (await _firebaseAuth
             .createUserWithEmailAndPassword(
