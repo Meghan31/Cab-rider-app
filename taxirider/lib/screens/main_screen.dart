@@ -5,6 +5,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:taxirider/assistants/assistant_methods.dart';
 import 'package:taxirider/widgets/divider.dart';
 
 class MainScreen extends StatefulWidget {
@@ -60,29 +61,35 @@ class _MainScreenState extends State<MainScreen> {
         desiredAccuracy: LocationAccuracy.high);
   }
 
-  void locatePosition() async {
-    Position position = await _getGeoLocationPosition();
-    currentPosition = position;
-    LatLng latLngPosition = LatLng(position.latitude, position.longitude);
-    CameraPosition cameraPosition =
-        new CameraPosition(target: latLngPosition, zoom: 14);
-    newGoogleMapController
-        .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
-  }
-
-  // Future locatePosition() async {
-  //   Position position = await Geolocator.getCurrentPosition(
-  //       desiredAccuracy: LocationAccuracy.high);
+  // void locatePosition() async {
+  //   Position position = await _getGeoLocationPosition();
   //   currentPosition = position;
-
-  //   LatLng latlanPosition = LatLng(position.latitude, position.longitude);
-
+  //   LatLng latLngPosition = LatLng(position.latitude, position.longitude);
   //   CameraPosition cameraPosition =
-  //       CameraPosition(target: latlanPosition, zoom: 14);
-
+  //       new CameraPosition(target: latLngPosition, zoom: 14);
   //   newGoogleMapController
   //       .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+
+  //   String address = await AssistantMethods.searchCoordinateAddress(position);
+  //   print('This is Your Address :: ' + address);
   // }
+
+  Future locatePosition() async {
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    currentPosition = position;
+
+    LatLng latlanPosition = LatLng(position.latitude, position.longitude);
+
+    CameraPosition cameraPosition =
+        CameraPosition(target: latlanPosition, zoom: 14);
+
+    newGoogleMapController
+        .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+
+    String address = await AssistantMethods.searchCoordinateAddress(position);
+    print('This is Your Address :: ' + address);
+  }
 
   static final CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(37.42796133580664, -122.085749655962),
