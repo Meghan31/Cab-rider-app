@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
+import 'package:taxirider/models/address.dart';
 
 class AppData extends ChangeNotifier {
-  String _name = 'Flutter';
-  String get name => _name;
-  set name(String value) {
-    _name = value;
+  Address? pickUpLocation;
+  void updatePickUpLocationAddress(Address pickUpAddress) {
+    pickUpLocation = pickUpAddress;
     notifyListeners();
   }
 }
