@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, unnecessary_new
 
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -136,7 +138,7 @@ class LoginScreen extends StatelessWidget {
                   textColor: Colors.grey,
                   onPressed: () {
                     // print('forgot');
-                    Navigator.of(context).pushNamed(MainScreen.routeName);
+                    Navigator.of(context).pushNamed(ForgotPassScreen.routeName);
                   },
                   child: Text(
                     'forgot password',
@@ -180,12 +182,19 @@ class LoginScreen extends StatelessWidget {
 
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   void loginAndAuthenticateUser(BuildContext context) async {
+    Timer? timer = Timer(Duration(milliseconds: 4000), () {
+      Navigator.of(context, rootNavigator: true).pop();
+    });
     showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
           return ProgressDialog();
-        });
+        }).then((value) {
+      // dispose the timer in case something else has triggered the dismiss.
+      timer?.cancel();
+      timer = null;
+    });
     final User? firebaseUser = (await _firebaseAuth
             .signInWithEmailAndPassword(
       email: emailTextEditingController.text,

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
@@ -206,12 +208,19 @@ class SignupScreen extends StatelessWidget {
 //the class "AuthResult" was changed to "UserCredential"
 
   Future<void> registerNewUser(BuildContext context) async {
+    Timer? timer = Timer(Duration(milliseconds: 4000), () {
+      Navigator.of(context, rootNavigator: true).pop();
+    });
     showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
           return ProgressDialog2();
-        });
+        }).then((value) {
+      // dispose the timer in case something else has triggered the dismiss.
+      timer?.cancel();
+      timer = null;
+    });
     final User? firebaseUser = (await _firebaseAuth
             .createUserWithEmailAndPassword(
       email: emailTextEditingController.text,
