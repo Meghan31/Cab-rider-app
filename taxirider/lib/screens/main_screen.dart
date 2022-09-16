@@ -1,14 +1,18 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'dart:async';
+// import 'dart:html';
 // import 'package:geocoding/geocoding.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:taxirider/assistants/assistant_methods.dart';
 import 'package:taxirider/screens/search_screen.dart';
 import 'package:taxirider/widgets/divider.dart';
+import 'package:taxirider/widgets/progressDialog.dart';
 
 import '../data handler/app_data.dart';
 
@@ -28,8 +32,13 @@ class _MainScreenState extends State<MainScreen> {
 
   GlobalKey<ScaffoldState> scaffolfkey = GlobalKey<ScaffoldState>();
 
+  List<LatLng> pLineCoordinates = [];
+  Set<Polyline> polylineSet = {};
+
   var geoLocator = Geolocator();
   double bottomPaddingOfMap = 0;
+  Set<Marker> markerSet = {};
+  Set<Circle> circleSet = {};
 
   Future<void> _getGeoLocationPosition() async {
     bool serviceEnabled;
@@ -209,6 +218,9 @@ class _MainScreenState extends State<MainScreen> {
               myLocationButtonEnabled: true,
               zoomGesturesEnabled: true,
               zoomControlsEnabled: true,
+              polylines: polylineSet,
+              markers: markerSet,
+              circles: circleSet,
               onMapCreated: (GoogleMapController controller) {
                 _controllerGoogleMap.complete(controller);
                 newGoogleMapController = controller;
@@ -313,11 +325,14 @@ class _MainScreenState extends State<MainScreen> {
                         height: 20,
                       ),
                       GestureDetector(
-                        onTap: () {
-                          Navigator.push(
+                        onTap: () async {
+                          var res = await Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => SearchScreen()));
+                          if (res == "obtainDirection") {
+                            await getPlaceDirection();
+                          }
                         },
                         child: Container(
                           decoration: BoxDecoration(
@@ -365,11 +380,12 @@ class _MainScreenState extends State<MainScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
+                                overflow: TextOverflow.ellipsis,
                                 Provider.of<AppData>(context).pickUpLocation !=
                                         null
                                     ? Provider.of<AppData>(context)
                                         .pickUpLocation!
-                                        .placeFormattedAddress
+                                        .placeName
                                     : "Add Home",
                               ),
                               SizedBox(
@@ -416,7 +432,7 @@ class _MainScreenState extends State<MainScreen> {
                                 style: TextStyle(
                                     fontSize: 12,
                                     // fontFamily: "Brand-Bold",
-                                    color: Colors.grey[200]),
+                                    color: Colors.black54),
                               ),
                             ],
                           ),
@@ -427,6 +443,142 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ),
             ),
+            // Positioned(
+            //   bottom: 0,
+            //   left: 0,
+            //   right: 0,
+            //   child: Container(
+            //     height: 230,
+            //     decoration: BoxDecoration(
+            //       color: Colors.white,
+            //       borderRadius: BorderRadius.only(
+            //         topLeft: Radius.circular(16),
+            //         topRight: Radius.circular(16),
+            //       ),
+            //       boxShadow: [
+            //         BoxShadow(
+            //           color: Colors.black,
+            //           blurRadius: 16,
+            //           spreadRadius: 0.5,
+            //           offset: Offset(0.7, 0.7),
+            //         ),
+            //       ],
+            //     ),
+            //     child: Padding(
+            //       padding: const EdgeInsets.symmetric(vertical: 18),
+            //       child: Column(
+            //         children: [
+            //           Container(
+            //             width: double.infinity,
+            //             color: Colors.teal[200],
+            //             child: Padding(
+            //               padding: const EdgeInsets.symmetric(vertical: 18.0),
+            //               child: Row(
+            //                 children: [
+            //                   Image.asset(
+            //                     'assets/images/taxi.png',
+            //                     height: 70,
+            //                     width: 80,
+            //                   ),
+            //                   SizedBox(
+            //                     width: 16,
+            //                   ),
+            //                   Column(
+            //                     crossAxisAlignment: CrossAxisAlignment.start,
+            //                     children: [
+            //                       Text(
+            //                         'Car',
+            //                         style: TextStyle(
+            //                             fontSize: 18, fontFamily: "Brand-Bold"),
+            //                       ),
+            //                       Text(
+            //                         // (tripDirectionDetails != null)
+            //                         //     ? tripDirectionDetails!.distanceText
+            //                         //     : '',
+            //                         '10km',
+            //                         style: TextStyle(
+            //                             fontSize: 16, color: Colors.grey),
+            //                       ),
+            //                     ],
+            //                   ),
+            //                   Expanded(
+            //                     child: Container(),
+            //                   ),
+            //                   // Text(
+            //                   //   (tripDirectionDetails != null)
+            //                   //       ? '\$${AssistantMethods.calculateFares(tripDirectionDetails!)}'
+            //                   //       : '',
+            //                   //   style: TextStyle(
+            //                   //       fontSize: 18, fontFamily: "Brand-Bold"),
+            //                   // ),
+            //                 ],
+            //               ),
+            //             ),
+            //           ),
+            //           SizedBox(
+            //             height: 20,
+            //           ),
+            //           Padding(
+            //             padding: EdgeInsets.symmetric(horizontal: 16),
+            //             child: Row(
+            //               children: [
+            //                 Icon(
+            //                   FontAwesomeIcons.moneyBillAlt,
+            //                   size: 18,
+            //                   color: Colors.black54,
+            //                 ),
+            //                 SizedBox(
+            //                   width: 16,
+            //                 ),
+            //                 Text('Cash'),
+            //                 SizedBox(
+            //                   width: 6,
+            //                 ),
+            //                 Icon(
+            //                   Icons.keyboard_arrow_down,
+            //                   color: Colors.black54,
+            //                   size: 16,
+            //                 ),
+            //               ],
+            //             ),
+            //           ),
+            //           SizedBox(
+            //             height: 20,
+            //           ),
+            //           Padding(
+            //             padding: EdgeInsets.symmetric(horizontal: 16),
+            //             child: RaisedButton(
+            //               child: Padding(
+            //                 padding: const EdgeInsets.all(17.0),
+            //                 child: Row(
+            //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //                   children: [
+            //                     Text(
+            //                       'Request',
+            //                       style: TextStyle(
+            //                           fontSize: 20,
+            //                           fontWeight: FontWeight.bold,
+            //                           color: Colors.white),
+            //                     ),
+            //                     Icon(
+            //                       FontAwesomeIcons.taxi,
+            //                       color: Colors.white,
+            //                       size: 26,
+            //                     ),
+            //                   ],
+            //                 ),
+            //               ),
+            //               color: Colors.teal[200],
+            //               onPressed: () {
+            //                 print('requesting a cab');
+            //               },
+            //             ),
+            //           ),
+            //         ],
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ],
         )
         //
@@ -435,5 +587,126 @@ class _MainScreenState extends State<MainScreen> {
         //
 
         );
+  }
+
+  Future<void> getPlaceDirection() async {
+    var initialpos =
+        Provider.of<AppData>(context, listen: false).pickUpLocation;
+    var finalpos = Provider.of<AppData>(context, listen: false).dropOffLocation;
+
+    var pickUpLatLng = LatLng(initialpos!.latitude, initialpos.longitude);
+    var dropOffLatLng = LatLng(finalpos!.latitude, finalpos.longitude);
+
+    Timer? timer = Timer(Duration(milliseconds: 2000), () {
+      Navigator.of(context, rootNavigator: true).pop();
+    });
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return ProgressDialog2();
+        }).then((value) {
+      // dispose the timer in case something else has triggered the dismiss.
+      timer?.cancel();
+      timer = null;
+    });
+
+    var details = await AssistantMethods.obtainPlaceDirectionDetails(
+        pickUpLatLng, dropOffLatLng, context);
+    print('this re encode points');
+    print(details.encodedPoints);
+
+    PolylinePoints polylinePoints = PolylinePoints();
+    List<PointLatLng> decodedPolyLinePointsResult =
+        polylinePoints.decodePolyline(details.encodedPoints!);
+
+    if (decodedPolyLinePointsResult.isNotEmpty) {
+      pLineCoordinates.clear();
+      if (decodedPolyLinePointsResult.length > 50) {
+        int i = 0;
+        while (i < decodedPolyLinePointsResult.length) {
+          pLineCoordinates.add(LatLng(decodedPolyLinePointsResult[i].latitude,
+              decodedPolyLinePointsResult[i].longitude));
+          i++;
+        }
+      } else {
+        pLineCoordinates = decodedPolyLinePointsResult
+            .map((e) => LatLng(e.latitude, e.longitude))
+            .toList();
+      }
+      polylineSet.clear();
+    }
+
+    setState(() {
+      Polyline polyline = Polyline(
+          color: Colors.pink,
+          polylineId: PolylineId('PolylineID'),
+          jointType: JointType.round,
+          points: pLineCoordinates,
+          width: 5,
+          startCap: Cap.roundCap,
+          endCap: Cap.roundCap,
+          geodesic: true);
+      polylineSet.add(polyline);
+    });
+    LatLngBounds latLngBounds;
+    if (pickUpLatLng.latitude > dropOffLatLng.latitude &&
+        pickUpLatLng.longitude > dropOffLatLng.longitude) {
+      latLngBounds =
+          LatLngBounds(southwest: dropOffLatLng, northeast: pickUpLatLng);
+    } else if (pickUpLatLng.longitude > dropOffLatLng.longitude) {
+      latLngBounds = LatLngBounds(
+          southwest: LatLng(pickUpLatLng.latitude, dropOffLatLng.longitude),
+          northeast: LatLng(dropOffLatLng.latitude, pickUpLatLng.longitude));
+    } else if (pickUpLatLng.latitude > dropOffLatLng.latitude) {
+      latLngBounds = LatLngBounds(
+          southwest: LatLng(dropOffLatLng.latitude, pickUpLatLng.longitude),
+          northeast: LatLng(pickUpLatLng.latitude, dropOffLatLng.longitude));
+    } else {
+      latLngBounds =
+          LatLngBounds(southwest: pickUpLatLng, northeast: dropOffLatLng);
+    }
+    newGoogleMapController
+        ?.animateCamera(CameraUpdate.newLatLngBounds(latLngBounds, 70));
+    Marker pickUpLocMarker = Marker(
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+      infoWindow:
+          InfoWindow(title: initialpos.placeName, snippet: 'My Location'),
+      position: pickUpLatLng,
+      markerId: MarkerId('pickUpId'),
+    );
+
+    Marker dropOffLocMarker = Marker(
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+      infoWindow:
+          InfoWindow(title: finalpos.placeName, snippet: 'Drop Off Location'),
+      position: dropOffLatLng,
+      markerId: MarkerId('dropOffId'),
+    );
+
+    setState(() {
+      markerSet.add(pickUpLocMarker);
+      markerSet.add(dropOffLocMarker);
+    });
+
+    Circle pickUpLocCircle = Circle(
+        fillColor: Colors.blueAccent,
+        center: pickUpLatLng,
+        radius: 12,
+        strokeWidth: 4,
+        strokeColor: Colors.blue,
+        circleId: CircleId('pickUpId'));
+
+    Circle dropOffLocCircle = Circle(
+        fillColor: Colors.deepPurple,
+        center: dropOffLatLng,
+        radius: 12,
+        strokeWidth: 4,
+        strokeColor: Colors.purple,
+        circleId: CircleId('dropOffId'));
+    setState(() {
+      circleSet.add(pickUpLocCircle);
+      circleSet.add(dropOffLocCircle);
+    });
   }
 }
