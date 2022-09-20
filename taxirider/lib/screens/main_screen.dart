@@ -4,12 +4,14 @@ import 'dart:async';
 // import 'dart:html';
 // import 'package:geocoding/geocoding.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:taxirider/api/config_maps.dart';
 import 'package:taxirider/assistants/assistant_methods.dart';
 import 'package:taxirider/models/direction_details.dart';
 import 'package:taxirider/screens/search_screen.dart';
@@ -47,6 +49,46 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   double searchContainerHeight = 340.0;
   bool drawerOpen = true;
 
+  DatabaseReference? rideRequestRef;
+
+  @override
+  void initState() {
+    super.initState();
+    AssistantMethods.getCurrentOnlineUserInfo();
+  }
+
+  void saveRideRequest() {
+    rideRequestRef =
+        FirebaseDatabase.instance.ref().child('Ride Requests').push();
+    var pickUp = Provider.of<AppData>(context, listen: false).pickUpLocation;
+    var dropOff = Provider.of<AppData>(context, listen: false).dropOffLocation;
+    Map pickUpLocMap = {
+      'latitude': pickUp!.latitude.toString(),
+      'longitude': pickUp.longitude.toString(),
+    };
+    Map dropOffLocMap = {
+      'latitude': dropOff!.latitude.toString(),
+      'longitude': dropOff.longitude.toString(),
+    };
+    Map rideInfoMap = {
+      'driver_id': 'waiting',
+      'payment_method': 'cash',
+      'pickup': pickUpLocMap,
+      'dropoff': dropOffLocMap,
+      'created_at': DateTime.now().toString(),
+      'rider_id': userCurrentInfo.id,
+      'rider_name': userCurrentInfo.name,
+      'rider_phone': userCurrentInfo.number,
+      'pickup_address': pickUp.placeName,
+      'dropoff_address': dropOff.placeName,
+    };
+    rideRequestRef!.set(rideInfoMap);
+  }
+
+  void cancelRideRequest() {
+    rideRequestRef!.remove();
+  }
+
   resetApp() {
     setState(() {
       drawerOpen = true;
@@ -79,6 +121,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       requestRideContainerHeight = 200;
       drawerOpen = true;
     });
+    saveRideRequest();
   }
 
   TypewriterAnimatedText textEmoji() {
@@ -760,6 +803,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                             ),
                             GestureDetector(
                               onTap: () {
+                                cancelRideRequest();
                                 resetApp();
                               },
                               child: Container(

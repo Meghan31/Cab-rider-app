@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -9,6 +11,7 @@ import 'package:taxirider/assistants/request_assistant.dart';
 import 'package:taxirider/data%20handler/app_data.dart';
 import 'package:taxirider/models/address.dart';
 
+import '../models/all_users.dart';
 import '../models/direction_details.dart';
 
 class AssistantMethods {
@@ -82,5 +85,17 @@ class AssistantMethods {
     double totalLocalAmount = totalFareAmount * 77.5;
 
     return totalLocalAmount.truncate();
+  }
+
+  static Future<void> getCurrentOnlineUserInfo() async {
+    firebaseUser = await FirebaseAuth.instance.currentUser;
+    String userId = firebaseUser!.uid;
+    DatabaseReference reference =
+        FirebaseDatabase.instance.ref().child("users").child(userId);
+    final snapshot =
+        await reference.get(); // you should use await on async methods
+    if (snapshot.value != null) {
+      userCurrentInfo = Users.fromSnapshot(snapshot);
+    }
   }
 }
