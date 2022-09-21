@@ -4,6 +4,7 @@ import 'dart:async';
 // import 'dart:html';
 // import 'package:geocoding/geocoding.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -14,6 +15,7 @@ import 'package:provider/provider.dart';
 import 'package:taxirider/api/config_maps.dart';
 import 'package:taxirider/assistants/assistant_methods.dart';
 import 'package:taxirider/models/direction_details.dart';
+import 'package:taxirider/screens/login_screen.dart';
 import 'package:taxirider/screens/search_screen.dart';
 import 'package:taxirider/widgets/divider.dart';
 import 'package:taxirider/widgets/progressDialog.dart';
@@ -296,6 +298,22 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     "About",
                     style: TextStyle(
                       fontSize: 15,
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    FirebaseAuth.instance.signOut();
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, LoginScreen.routeName, (route) => false);
+                  },
+                  child: ListTile(
+                    leading: Icon(Icons.info),
+                    title: Text(
+                      "SignOut",
+                      style: TextStyle(
+                        fontSize: 15,
+                      ),
                     ),
                   ),
                 ),

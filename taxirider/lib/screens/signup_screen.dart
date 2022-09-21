@@ -242,7 +242,7 @@ class SignupScreen extends StatelessWidget {
       displayToastMessage('Congo!!!, your account has been created', context);
 
       Navigator.of(context)
-          .pushNamedAndRemoveUntil(MainScreen.routeName, (route) => false);
+          .pushNamedAndRemoveUntil(LoginScreen.routeName, (route) => false);
     } else {
       Navigator.of(context).pop;
       //error occured-display error msg
