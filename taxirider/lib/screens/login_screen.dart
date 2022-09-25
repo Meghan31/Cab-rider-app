@@ -207,12 +207,22 @@ class LoginScreen extends StatelessWidget {
         .user;
     if (firebaseUser != null) //user created
     {
-      Navigator.of(context)
-          .pushNamedAndRemoveUntil(MainScreen.routeName, (route) => false);
-      displayToastMessage('your are logged in', context);
+      usersRef.child(firebaseUser.uid).once().then((event) {
+        final dataSnapshot = event.snapshot;
+        if (dataSnapshot.value != null) {
+          Navigator.of(context)
+              .pushNamedAndRemoveUntil(MainScreen.routeName, (route) => false);
+          displayToastMessage('your are logged in', context);
+        } else {
+          Navigator.of(context).pop;
+          _firebaseAuth.signOut();
+          displayToastMessage(
+              'No account exist with this credentials ', context);
+        }
+      });
     } else {
       Navigator.of(context).pop;
-      displayToastMessage('No account exist with this credentials ', context);
+      displayToastMessage('Error Occured, can not be Signed in', context);
     }
   }
 }
