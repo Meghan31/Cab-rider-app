@@ -46,6 +46,7 @@ dependencies:
   flutter_polyline_points: ^1.0.0
   font_awesome_flutter: ^10.2.1
   animated_text_kit: ^4.2.2
+  flutter_geofire: ^2.0.1
   
 
 
@@ -88,6 +89,9 @@ flutter:
     - assets/gif/login_page.gif
     - assets/gif/car_vertical.gif
     - assets/gif/signup_page.gif
+    - assets/images/cabtop.png
+    - assets/images/car_ios.png
+    - assets/images/resizedtop.png
     
 
   # An image asset can refer to one or more resolution-specific "variants", see
