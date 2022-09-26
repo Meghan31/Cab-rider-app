@@ -7,6 +7,7 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -20,7 +21,9 @@ import 'package:taxirider/screens/search_screen.dart';
 import 'package:taxirider/widgets/divider.dart';
 import 'package:taxirider/widgets/progressDialog.dart';
 
+import '../assistants/geofire_assistant.dart';
 import '../data handler/app_data.dart';
+import '../models/nearby_available_drivers.dart';
 
 class MainScreen extends StatefulWidget {
   static const routeName = '/mainscreen';
@@ -51,7 +54,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   double searchContainerHeight = 340.0;
   bool drawerOpen = true;
 
+  bool nearbyAvailableDriversKeyLoaded = true;
+
   DatabaseReference? rideRequestRef;
+
+  BitmapDescriptor? nearbyIcon;
 
   @override
   void initState() {
@@ -216,7 +223,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     }).catchError((e) {
       debugPrint(e);
     });
-
+    initGeoFireListener();
     // When we reach here, permissions are granted and we can
     // continue accessing the position of the device.
   }
@@ -228,6 +235,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    createIconMarker();
     return Scaffold(
         key: scaffolfkey,
         appBar: AppBar(
@@ -992,5 +1000,89 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       circleSet.add(pickUpLocCircle);
       circleSet.add(dropOffLocCircle);
     });
+  }
+
+  void initGeoFireListener() {
+    Geofire.initialize('availableDrivers');
+    Geofire.queryAtLocation(
+            currentPosition!.latitude, currentPosition!.longitude, 15)!
+        .listen((map) {
+      if (map != null) {
+        var callBack = map['callBack'];
+        switch (callBack) {
+          case Geofire.onKeyEntered:
+            NearbyAvailableDrivers nearbyAvailableDrivers =
+                NearbyAvailableDrivers();
+            nearbyAvailableDrivers.key = map['key'];
+            nearbyAvailableDrivers.latitude = map['latitude'];
+            nearbyAvailableDrivers.longitude = map['longitude'];
+            GeoFireAssistant.nearbyAvailableDriversList
+                .add(nearbyAvailableDrivers);
+            if (nearbyAvailableDriversKeyLoaded) {
+              updateAvailableDriversOnMap();
+            }
+            break;
+          case Geofire.onKeyExited:
+            GeoFireAssistant.removeDriverFromList(map['key']);
+            updateAvailableDriversOnMap();
+            break;
+          case Geofire.onKeyMoved:
+            NearbyAvailableDrivers nearbyAvailableDrivers =
+                NearbyAvailableDrivers();
+            nearbyAvailableDrivers.key = map['key'];
+            nearbyAvailableDrivers.latitude = map['latitude'];
+            nearbyAvailableDrivers.longitude = map['longitude'];
+            GeoFireAssistant.updateDriverNearbyLocation(nearbyAvailableDrivers);
+            updateAvailableDriversOnMap();
+            break;
+          case Geofire.onGeoQueryReady:
+            updateAvailableDriversOnMap();
+            break;
+        }
+      }
+      setState(() {});
+    });
+  }
+
+  void updateAvailableDriversOnMap() {
+    setState(() {
+      markerSet.clear();
+    });
+    Set<Marker> tMarker = Set<Marker>();
+    for (NearbyAvailableDrivers driver
+        in GeoFireAssistant.nearbyAvailableDriversList) {
+      LatLng driverAvailablePosition =
+          LatLng(driver.latitude!.toDouble(), driver.longitude!.toDouble());
+      Marker marker = Marker(
+        markerId: MarkerId('driver${driver.key}'),
+        position: driverAvailablePosition,
+        icon: nearbyIcon as BitmapDescriptor,
+        rotation: AssistantMethods.createRandomNumber(360),
+      );
+      tMarker.add(marker);
+    }
+    setState(() {
+      markerSet = tMarker;
+    });
+  }
+
+  void createIconMarker() {
+    if (nearbyIcon == null) {
+      ImageConfiguration imageConfiguration =
+          createLocalImageConfiguration(context, size: Size(2, 2));
+      BitmapDescriptor.fromAssetImage(
+              imageConfiguration, "assets/images/resizedtop.png")
+          .then((value) {
+        nearbyIcon = value;
+      });
+    }
+    // if (destinationIcon == null) {
+    //   ImageConfiguration imageConfiguration =
+    //       createLocalImageConfiguration(context, size: Size(2, 2));
+    //   BitmapDescriptor.fromAssetImage(imageConfiguration, 'images/desticon.png')
+    //       .then((value) {
+    //     destinationIcon = value;
+    //   });
+    // }
   }
 }

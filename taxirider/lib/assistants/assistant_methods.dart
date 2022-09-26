@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -97,5 +98,11 @@ class AssistantMethods {
     if (snapshot.value != null) {
       userCurrentInfo = Users.fromSnapshot(snapshot);
     }
+  }
+
+  static double createRandomNumber(int num) {
+    var random = Random();
+    int radNum = random.nextInt(num);
+    return radNum.toDouble();
   }
 }
